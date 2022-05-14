@@ -41,6 +41,13 @@ create table dangxiaotiku_fzdx
 # 代码
 
 ```python
+# Author:Yuan Jinmin
+# -*- coding = utf-8 -*-
+# @Time  :2022/5/13 15:13
+# @Author:YJM
+# @Site  :
+# @File  :__init__.py.py
+# @Software: IntelliJ IDEA
 from time import sleep
 import pymysql
 import requests
@@ -162,14 +169,14 @@ def judge(number, c):
 			print('答案正确，为：', c)
 			return c
 	else:
-		print('答案正确，为：', c)
-		return c
+		print('ERROR')
+		exit(1)
 
 
-def get_one():
+def get_one(type):
 	# 获取题目（get）
-	# 入党积极分子1 发展对象2 预备党员3（包括了全部的）
-	target_url = 'https://dangxiao.hnust.edu.cn/index.php?s=/Exam/practice/lib/3'
+	# 入党积极分子1 发展对象2 预备党员3（均不完全重合，如要爬取完整题库，三个都要爬）
+	target_url = 'https://dangxiao.hnust.edu.cn/index.php?s=/Exam/practice/lib/' + str(type)
 	# 请求方法: POST
 	headers = {
 		'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36',
@@ -178,7 +185,7 @@ def get_one():
 
 	# 因为https是第三方CA证书认证的
 	# 解决办法 是：告诉web 忽略证书访问 verify = False
-	response = requests.get(url=target_url, headers=headers, verify=False)
+	response = requests.get(url=target_url, headers=headers, verify=False, timeout=10)
 
 	resp = response.text
 	# print(resp)
@@ -205,8 +212,6 @@ def get_one():
 			answer_content = tr.xpath('./td[2]/text()')[0]
 			answer_content_list.append(answer_content)
 		print(answer_content_list)
-
-		is_multiple = ''
 
 		# 多选题
 		if number.find('[]') != -1:
@@ -263,9 +268,16 @@ def get_one():
 
 if __name__ == '__main__':
 	i = 0
-	# 爬2000次
-	while i < 2000:
-		get_one()
+	# 爬10000次
+	cishu = 10000
+	# 爬全部题库（不过好像预备党员的题目发展对象包括的非常多）
+	while i < cishu:
+		if i < cishu / 3:
+			get_one(1)
+		elif i < cishu * 2 / 3:
+			get_one(2)
+		else:
+			get_one(3)
 		i = i + 1
 		sleep(1)
 ```
