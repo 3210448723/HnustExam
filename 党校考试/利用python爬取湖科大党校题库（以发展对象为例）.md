@@ -18,17 +18,18 @@
 * 数据库结构为（DDL）
 
 ```sql
-create table mydb.dangxiaotiku_fzdx
+-- auto-generated definition
+create table dangxiaotiku_fzdx
 (
     problem_id int           not null
         primary key,
-    title      varchar(200)  not null,
-    A          varchar(50)   null,
-    B          varchar(50)   null,
-    C          varchar(50)   null,
-    D          varchar(50)   null,
-    E          varchar(50)   null,
-    answer     varchar(10)   null,
+    title      varchar(500)  not null,
+    A          varchar(100)  null,
+    B          varchar(100)  null,
+    C          varchar(100)  null,
+    D          varchar(100)  null,
+    E          varchar(100)  null,
+    answer     varchar(20)   null,
     count      int default 1 not null,
     constraint dangxiaotiku_fzdx_problem_id_uindex
         unique (problem_id)
@@ -45,12 +46,11 @@ import pymysql
 import requests
 from lxml import html
 
+requests.packages.urllib3.disable_warnings()
+
 
 def connect_database():
 	# 打开数据库连接
-	
-	## 修改成自己的数据库！！！
-	
 	db = pymysql.connect("localhost", "root", "root", "mydb")
 	# 使用cursor()方法获取操作游标
 	cursor = db.cursor()
@@ -72,7 +72,8 @@ def has_exists(problem_id):
 			t = cursor.fetchall()
 			print(t)
 			data = int(t[0][0]) + 1
-			cursor.execute('update mydb.dangxiaotiku_fzdx set count=' + str(data) + ' where problem_id=' + str(problem_id))
+			cursor.execute(
+				'update mydb.dangxiaotiku_fzdx set count=' + str(data) + ' where problem_id=' + str(problem_id))
 			db.commit()
 			return True
 	except Exception as e:
@@ -149,7 +150,7 @@ def judge(number, c):
 	print(data)
 	response = requests.post(url=submit_url, headers=headers, data=data, verify=False)
 	json = response.json()
-	# 状态码 没有响应，正确，有响应，status=100 \u7b54\u6848\u4e0d\u6b63\u786e 为错误
+	# 状态码 响应为200，正确，有响应，status=100 \u7b54\u6848\u4e0d\u6b63\u786e 为错误
 	print(json)
 	if json.__len__() > 0:
 		status = json.get('status')
@@ -167,8 +168,8 @@ def judge(number, c):
 
 def get_one():
 	# 获取题目（get）
-	# 入党积极分子1 发展对象2 预备党员3
-	target_url = 'https://dangxiao.hnust.edu.cn/index.php?s=/Exam/practice/lib/2'
+	# 入党积极分子1 发展对象2 预备党员3（包括了全部的）
+	target_url = 'https://dangxiao.hnust.edu.cn/index.php?s=/Exam/practice/lib/3'
 	# 请求方法: POST
 	headers = {
 		'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36',
@@ -210,8 +211,14 @@ def get_one():
 		# 多选题
 		if number.find('[]') != -1:
 			print('多选题')
-			c_list = [['A', 'B'], ['A', 'C'], ['A', 'D'], ['B', 'C'], ['B', 'D'], ['C', 'D'],
-			          ['A', 'B', 'C'], ['A', 'B', 'D'], ['B', 'C', 'D'], ['A', 'B', 'C', 'D']]
+			c_list = [['A', 'B'], ['A', 'C'], ['A', 'D'], ['A', 'E'], ['B', 'C'], ['B', 'D'], ['B', 'E'], ['C', 'D'],
+			          ['C', 'E'],
+			          ['D', 'E'],
+			          ['A', 'B', 'C'], ['A', 'B', 'D'], ['A', 'B', 'E'], ['B', 'C', 'D'], ['B', 'C', 'E'],
+			          ['B', 'D', 'E'], ['A', 'C', 'D'], ['A', 'C', 'E'], ['A', 'D', 'E'], ['C', 'D', 'E'],
+			          ['A', 'B', 'C', 'D'], ['A', 'B', 'C', 'E'], ['A', 'B', 'D', 'E'], ['B', 'C', 'D', 'E'],
+			          ['A', 'C', 'D', 'E'],
+			          ['A', 'B', 'C', 'D', 'E']]
 			i = 0
 			while i < c_list.__len__():
 				# 抽取一种可能的答案
@@ -256,10 +263,9 @@ def get_one():
 
 if __name__ == '__main__':
 	i = 0
-	# 爬1000次
-	while i < 1000:
+	# 爬2000次
+	while i < 2000:
 		get_one()
 		i = i + 1
 		sleep(1)
-
 ```
