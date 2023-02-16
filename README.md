@@ -3,3 +3,6 @@
 
 # 友情链接
 1. [lyf大佬笔记仓库](https://github.com/Lyfive/HnusterComputer)
+
+# 注意
+本仓库不再更新新科目，若有新科目笔记，将新疆仓库。
